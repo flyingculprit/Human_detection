@@ -1,0 +1,22 @@
+<!-- result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flood Recovery System</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+     <h1>Flood Recovery System</h1>
+
+    <h3>Result:</h3>
+    <p><strong>Transcription:</strong> {{ transcription }}</p>
+    <p><strong>Voice Detection:</strong> {{ voice_detection }}</p>
+    {% if latitude and longitude %}
+        <p><strong>Latitude:</strong> {{ latitude }}</p>
+        <p><strong>Longitude:</strong> {{ longitude }}</p>
+    {% endif %}
+    <a href="/">Upload another file</a>
+</body>
+</html>
