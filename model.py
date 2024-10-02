@@ -85,9 +85,9 @@ def fetch_lat_lon_from_esp8266():
 def send_email(lat, lon,temp):
     try:
         # Email details
-        sender_email = "thamizhmass057@gmail.com"
-        receiver_email = "thamizh5253@gmail.com"
-        password = "egdd narw nrmp wjgc"
+        sender_email = "sender"
+        receiver_email = "receiver"
+        password = "pass"
 
         subject = "Human Detected in the Disaster Area"
         body = f"""
@@ -138,14 +138,14 @@ def upload_file():
             return 'No selected file'
         if file:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-            # file.save(file_path)
+            file.save(file_path)
 
             # Load and preprocess the audio
-            # input_audio = load_audio(file_path)
+            input_audio = load_audio(file_path)
 
             # Transcribe the audio
-            # transcription = transcribe_audio(input_audio)
-            transcription='hel pme'
+            transcription = transcribe_audio(input_audio)
+            # transcription='hel pme'
             # Detect if human voice is present and fetch location
             voice_detection, (lat, lon,temp) = detect_human_voice(transcription)
 
