@@ -10,6 +10,10 @@ body {
     line-height: 1.6;
     background-color: #f4f4f4;
     color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Align items in a column */
 }
 
 h1 {
@@ -67,3 +71,26 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+#resultdiv{
+border: 2px solid #4CAF50 ;
+width : 500px;
+height : 200px;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column; /* Align items in a column */
+
+}
+
+.map-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+
+
+

@@ -1,22 +1,41 @@
-<!-- result.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Flood Recovery System</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-     <h1>Flood Recovery System</h1>
+    <h1>Flood Recovery System</h1>
 
     <h3>Result:</h3>
-    <p><strong>Transcription:</strong> {{ transcription }}</p>
-    <p><strong>Voice Detection:</strong> {{ voice_detection }}</p>
-    {% if latitude and longitude %}
-        <p><strong>Latitude:</strong> {{ latitude }}</p>
-        <p><strong>Longitude:</strong> {{ longitude }}</p>
-    {% endif %}
+    <div id="resultdiv">
+        <p align="center"><strong>Transcription:</strong> {{ transcription }}</p>
+        <p align="center"><strong>Voice Detection:</strong> {{ voice_detection }}</p>
+
+        {% if voice_detection != "No human voice detected." %}
+            {# Human voice detected #}
+            {% if latitude and longitude %}
+                {# Location data available #}
+                <p align="center"><strong>Latitude:</strong> {{ latitude }}</p>
+                <p align="center"><strong>Longitude:</strong> {{ longitude }}</p>
+                <p align="center"><strong>Temperature:</strong> {{ temperature }}</p>
+
+                <!-- Google Maps Link -->
+                <div class="map-container">
+                    <p>
+                        <a style="color: blue;" href="http://maps.google.com/maps?&z=15&mrt=yp&t=k&q={{ latitude }},{{ longitude }}" target="_blank">Click here to open the map.</a>
+                    </p>
+                </div>
+            {% else %}
+                {# Location data not available #}
+                <p style="color: red;">Error: Unable to retrieve location data.</p>
+            {% endif %}
+        {% else %}
+            {# No human voice detected #}
+        {% endif %}
+    </div>
+
     <a href="/">Upload another file</a>
 </body>
 </html>
