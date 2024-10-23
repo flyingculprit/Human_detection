@@ -1,0 +1,85 @@
+#include <ESP8266WiFi.h>
+#include <DHT.h>
+#include <ArduinoJson.h>  // For JSON format data
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+
+// DHT11 Sensor Setup
+#define DHTPIN D3          // Pin connected to DHT11 (changed to D3)
+#define DHTTYPE DHT11      // Define the DHT type as DHT11
+DHT dht(DHTPIN, DHTTYPE); // Initialize the DHT11 sensor
+
+// GPS Setup
+TinyGPSPlus gps;
+SoftwareSerial SerialGPS(4, 5);  // RX, TX pins for GPS module
+
+// WiFi Setup
+const char* ssid = "CYRUSBYTE";
+const char* password = "VARSHINIMURUGAN@!"; WiFiServer server(80);
+
+// Variables for GPS Data
+float Latitude, Longitude;
+String LatitudeString, LongitudeString;
+
+// Variables for Temperature
+float Temperature;
+String TemperatureString;
+
+void setup() {
+  Serial.begin(115200);
+  SerialGPS.begin(9600);
+
+  // Connect to WiFi
+  Serial.println();
+  Serial.print("Connecting to WiFi");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected to WiFi");
+
+  // Start the server
+  server.begin();
+  Serial.println("Server started");
+  Serial.println(WiFi.localIP());
+
+  // Initialize the DHT11 sensor
+  dht.begin();
+}
+
+void loop() {
+  // GPS Data Handling
+  while (SerialGPS.available() > 0) {
+    if (gps.encode(SerialGPS.read())) {
+      if (gps.location.isValid()) {
+        Latitude = gps.location.lat();
+        LatitudeString = String(Latitude, 6);
+        Longitude = gps.location.lng();
+        LongitudeString = String(Longitude, 6);
+      }
+    }
+  }
+
+  // Get Temperature Data from DHT11
+  Temperature = dht.readTemperature();
+  TemperatureString = String(Temperature, 2);
+
+  // Check for incoming clients
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+
+  // Create JSON response
+  String response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+  response += "{";
+  response += "\"latitude\": \"" + LatitudeString + "\",";
+  response += "\"longitude\": \"" + LongitudeString + "\",";
+  response += "\"temperature\": \"" + TemperatureString + "\"";
+  response += "}";
+
+  // Send the response to the client
+  client.print(response);
+  delay(100); // Small delay to ensure data is properly sent
+}
