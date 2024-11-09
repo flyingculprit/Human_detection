@@ -14,8 +14,7 @@ TinyGPSPlus gps;
 SoftwareSerial SerialGPS(4, 5);  // RX, TX pins for GPS module
 
 // WiFi Setup
-const char* ssid = "CYRUSBYTE";
-const char* password = "VARSHINIMURUGAN@!"; WiFiServer server(80);
+const char* ssid = "CYRUSBYTE";const char* password = "12121212"; WiFiServer server(80);
 
 // Variables for GPS Data
 float Latitude, Longitude;

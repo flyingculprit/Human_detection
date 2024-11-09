@@ -2,12 +2,14 @@ from flask import Flask, request, render_template
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 import torch
 import torchaudio
+import cv2
 from pydub import AudioSegment
 import os
 import requests
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 import random
 import math
 
@@ -36,19 +38,28 @@ def transcribe_audio(input_audio):
     return transcription
 
 # Function to fetch latitude and longitude from the user's IP
-# def fetch_lat_lon_from_ip():
-#     try:
-#         # Example using ipinfo.io
-#         response = requests.get("https://ipinfo.io/json")
-#         data = response.json()
-#         loc = data.get("loc")  # Location in the format "lat,lon"
-#         if loc:
-#             lat, lon = loc.split(",")
-#             return lat, lon
-#     except Exception as e:
-#         print(f"Error fetching location: {e}")
-#     return None, None
+def fetch_lat_lon_from_ip():
+    try:
+        # Example using ipinfo.io
+        response = requests.get("https://ipinfo.io/json")
+        data = response.json()
+        loc = data.get("loc")  # Location in the format "lat,lon"
+        if loc:
+            lat, lon = loc.split(",")
+            return lat, lon,37
+    except Exception as e:
+        print(f"Error fetching location: {e}")
+    return None, None ,None
 
+# Capture image using webcam and save it
+def capture_webcam_image():
+    cam = cv2.VideoCapture(0)
+    ret, frame = cam.read()
+    if ret:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'webcam_capture.jpg')
+        cv2.imwrite(image_path, frame)
+    cam.release()
+    return image_path if ret else None
 
 def fetch_lat_lon_from_esp8266():
     try:
@@ -82,12 +93,12 @@ def fetch_lat_lon_from_esp8266():
 
 
 # Function to send an email with the location details
-def send_email(lat, lon,temp):
+def send_email(lat, lon,temp, image_path):
     try:
         # Email details
-        sender_email = "sender"
-        receiver_email = "receiver"
-        password = "pass"
+        sender_email = "@gmail.com"
+        receiver_email = "@gmail.com"
+        password = "d"
 
         subject = "Human Detected in the Disaster Area"
         body = f"""
@@ -108,6 +119,13 @@ def send_email(lat, lon,temp):
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
+        # Attach image if available
+        if image_path:
+            with open(image_path, 'rb') as img:
+                img_data = img.read()
+                image = MIMEImage(img_data, name=os.path.basename(image_path))
+                msg.attach(image)
+
         # Set up the server
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
@@ -123,7 +141,7 @@ def send_email(lat, lon,temp):
 # Function to detect human voice based on transcription
 def detect_human_voice(transcription):
     if transcription.strip():  # If the transcription contains words
-        return "Human voice detected.", fetch_lat_lon_from_esp8266()  # Fetch latitude and longitude
+        return "Human voice detected.", fetch_lat_lon_from_ip()  # Fetch latitude and longitude
     else:
         return "No human voice detected.", (None, None,None)
 
@@ -159,7 +177,10 @@ def upload_file():
                                            error_message=error_message)
                 else:
                     # If human voice is detected, send the email
-                    send_email(lat, lon, temp)
+
+                    # Capture an image from the webcam
+                    image_path = capture_webcam_image()
+                    send_email(lat, lon, temp, image_path )
 
                     # If valid location data is available
                     return render_template('result.html', transcription=transcription,
